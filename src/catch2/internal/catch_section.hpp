@@ -69,19 +69,29 @@ namespace Catch {
 namespace Detail {
 // Intentionally without linkage, as it should only be used as a dummy
 // symbol for static analysis.
-int GetSectionHint();
+int GetNewSectionHint();
 }
 }
+
+// TODO: Fix shadowing // CATCH_INTERNAL_SUPPRESS_SHADOW_WARNINGS
 
 #    define INTERNAL_CATCH_SECTION( ... )                            \
+        CATCH_INTERNAL_START_WARNINGS_SUPPRESSION                    \
+        CATCH_INTERNAL_SUPPRESS_UNUSED_VARIABLE_WARNINGS             \
+        CATCH_INTERNAL_SUPPRESS_SHADOW_WARNINGS                      \
         if ( [[maybe_unused]] int previousSectionHint = sectionHint, \
              sectionHint = Catch::Detail::GetNewSectionHint();       \
-             previousSectionHint == __LINE__ )
+             previousSectionHint == __LINE__ )                       \
+        CATCH_INTERNAL_STOP_WARNINGS_SUPPRESSION
 
 #    define INTERNAL_CATCH_DYNAMIC_SECTION( ... )                    \
+        CATCH_INTERNAL_START_WARNINGS_SUPPRESSION                    \
+        CATCH_INTERNAL_SUPPRESS_UNUSED_VARIABLE_WARNINGS             \
+        CATCH_INTERNAL_SUPPRESS_SHADOW_WARNINGS                      \
         if ( [[maybe_unused]] int previousSectionHint = sectionHint, \
              sectionHint = Catch::Detail::GetNewSectionHint();       \
-             previousSectionHint == __LINE__ )
+             previousSectionHint == __LINE__ )                       \
+        CATCH_INTERNAL_STOP_WARNINGS_SUPPRESSION
 
 #endif
 

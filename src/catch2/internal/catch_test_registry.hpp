@@ -88,6 +88,40 @@ struct AutoReg : Detail::NonCopyable {
     #define INTERNAL_CATCH_TESTCASE( ... ) \
         INTERNAL_CATCH_TESTCASE2( INTERNAL_CATCH_UNIQUE_NAME( CATCH2_INTERNAL_TEST_ ), __VA_ARGS__ )
 
+#else  // ^^ !CATCH_CONFIG_EXPERIMENTAL_STATIC_ANALYSIS_SUPPORT | vv CATCH_CONFIG_EXPERIMENTAL_STATIC_ANALYSIS_SUPPORT
+
+
+// Dummy registrator for the dumy test case macros
+namespace Catch {
+    namespace Detail {
+        struct DummyUse {
+            DummyUse( void ( * )( int ) );
+        };
+    } // namespace Detail
+} // namespace Catch
+
+// Note that both the presence of the argument and its exact name are
+// necessary for the section support.
+
+// We provide a shadowed variable so that a `SECTION` inside non-`TEST_CASE`
+// tests can compile. The redefined `TEST_CASE` shadows this with param.
+static int sectionHint = 0;
+
+#    define INTERNAL_CATCH_TESTCASE2( fname )                            \
+        static void fname( int );                                        \
+        CATCH_INTERNAL_START_WARNINGS_SUPPRESSION                        \
+        CATCH_INTERNAL_SUPPRESS_GLOBALS_WARNINGS                         \
+        CATCH_INTERNAL_SUPPRESS_UNUSED_VARIABLE_WARNINGS                 \
+        static const Catch::Detail::DummyUse INTERNAL_CATCH_UNIQUE_NAME( dummyUser )( &fname ); \
+        CATCH_INTERNAL_SUPPRESS_SHADOW_WARNINGS                          \
+        static void fname( [[maybe_unused]] int sectionHint ) \
+        CATCH_INTERNAL_STOP_WARNINGS_SUPPRESSION
+#define INTERNAL_CATCH_TESTCASE( ... ) \
+        INTERNAL_CATCH_TESTCASE2( INTERNAL_CATCH_UNIQUE_NAME( dummyFunction ) )
+
+
+#endif // CATCH_CONFIG_EXPERIMENTAL_STATIC_ANALYSIS_SUPPORT
+
     ///////////////////////////////////////////////////////////////////////////////
     #define INTERNAL_CATCH_TEST_CASE_METHOD2( TestName, ClassName, ... )\
         CATCH_INTERNAL_START_WARNINGS_SUPPRESSION \
@@ -107,19 +141,6 @@ struct AutoReg : Detail::NonCopyable {
         void TestName::test()
     #define INTERNAL_CATCH_TEST_CASE_METHOD( ClassName, ... ) \
         INTERNAL_CATCH_TEST_CASE_METHOD2( INTERNAL_CATCH_UNIQUE_NAME( CATCH2_INTERNAL_TEST_ ), ClassName, __VA_ARGS__ )
-
-#else  // ^^ !CATCH_CONFIG_EXPERIMENTAL_STATIC_ANALYSIS_SUPPORT | vv CATCH_CONFIG_EXPERIMENTAL_STATIC_ANALYSIS_SUPPORT
-
-// Note that both the presence of the argument and its exact name are
-// necessary for the section support.
-
-#    define INTERNAL_CATCH_TESTCASE(...) \
-    void INTERNAL_CATCH_UNIQUE_NAME( fakeFunctionName )( [[maybe_unused]] int sectionHint )
-
-#    define INTERNAL_CATCH_TEST_CASE_METHOD(...)
-    void INTERNAL_CATCH_UNIQUE_NAME( fakeFunctionName )( [[maybe_unused]] int sectionHint )
-
-#endif // CATCH_CONFIG_EXPERIMENTAL_STATIC_ANALYSIS_SUPPORT
 
 
     ///////////////////////////////////////////////////////////////////////////////
