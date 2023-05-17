@@ -9183,10 +9183,10 @@ namespace Catch {
                 auto const new_width = std::max( m_width, row.size() );
                 if ( new_width > m_width ) {
                     for ( auto& oldRow : m_rows ) {
-                        oldRow.insert( 0, new_width - m_width, ' ' );
+                        oldRow.insert((size_t) 0, new_width - m_width, ' ' );
                     }
                 } else {
-                    row.insert( 0, m_width - row.size(), ' ' );
+                    row.insert((size_t) 0, m_width - row.size(), ' ' );
                 }
                 m_width = new_width;
                 m_rows.push_back( row );
