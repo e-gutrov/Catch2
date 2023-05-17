@@ -551,3 +551,27 @@ TEST_CASE("Validate SEH behavior - no crash for stack unwinding", "[approvals][!
 }
 
 #endif // _MSC_VER
+
+TEST_CASE( "Example" ) {
+    std::string foo = "hello";
+
+    SECTION( "A" ) {
+        std::string a = std::move(foo);
+        CHECK( a == "hello" );
+    }
+
+    SECTION( "Group" ) {
+        SECTION( "B" ) {
+            std::string b = std::move( foo );
+            CHECK( b == "hello" );
+        }
+        SECTION( "C" ) {
+            std::string c = std::move( foo );
+            CHECK(c == "hello");
+
+            //// should only emit warning here
+            //std::string d = std::move( foo );
+            //CHECK( d == "hello" );
+        }
+    }
+}
